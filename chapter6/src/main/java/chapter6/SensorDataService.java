@@ -11,15 +11,15 @@ import io.vertx.core.json.JsonObject;
 @VertxGen // To generate RxJava 2 / Kotlin / whatever bindings
 public interface SensorDataService {
 
-  static SensorDataService create(Vertx vertx) {
-    return new SensorDataServiceImpl(vertx);
-  }
+    static SensorDataService create(Vertx vertx) {
+        return new SensorDataServiceImpl(vertx);
+    }
 
-  static SensorDataService createProxy(Vertx vertx, String address) {
-    return new SensorDataServiceVertxEBProxy(vertx, address);
-  }
+    static SensorDataService createProxy(Vertx vertx, String address) {
+        return new SensorDataServiceVertxEBProxy(vertx, address);
+    }
 
-  void valueFor(String sensorId, Handler<AsyncResult<JsonObject>> handler);
+    void valueFor(String sensorId, Handler<AsyncResult<JsonObject>> handler);
 
-  void average(Handler<AsyncResult<JsonObject>> handler);
+    void average(Handler<AsyncResult<JsonObject>> handler);
 }

@@ -9,21 +9,21 @@ import org.slf4j.LoggerFactory;
 
 public class SampleVerticle extends AbstractVerticle {
 
-  private final Logger logger = LoggerFactory.getLogger(SampleVerticle.class);
+    private final Logger logger = LoggerFactory.getLogger(SampleVerticle.class);
 
-  @Override
-  public void start() {
-    logger.info("n = {}", config().getInteger("n", -1));
-  }
-
-  public static void main(String[] args) {
-    Vertx vertx = Vertx.vertx();
-    for (int n = 0; n < 4; n++) {
-      JsonObject conf = new JsonObject().put("n", n);
-      DeploymentOptions opts = new DeploymentOptions()
-        .setConfig(conf)
-        .setInstances(n);
-      vertx.deployVerticle("chapter2.opts.SampleVerticle", opts);
+    @Override
+    public void start() {
+        logger.info("n = {}", config().getInteger("n", -1));
     }
-  }
+
+    public static void main(String[] args) {
+        Vertx vertx = Vertx.vertx();
+        for (int n = 0; n < 4; n++) {
+            JsonObject conf = new JsonObject().put("n", n);
+            DeploymentOptions opts = new DeploymentOptions()
+                .setConfig(conf)
+                .setInstances(n);
+            vertx.deployVerticle("chapter2.opts.SampleVerticle", opts);
+        }
+    }
 }

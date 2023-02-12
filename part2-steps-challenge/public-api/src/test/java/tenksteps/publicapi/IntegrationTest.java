@@ -39,251 +39,251 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 class IntegrationTest {
 
-  @Container
-  private static final DockerComposeContainer CONTAINERS = new DockerComposeContainer(new File("../docker-compose.yml"))
-    .withExposedService("postgres_1", 5432)
-    .withExposedService("mongo_1", 27017)
-    .withExposedService("kafka_1", 9092);
+    @Container
+    private static final DockerComposeContainer CONTAINERS = new DockerComposeContainer(new File("../docker-compose.yml"))
+        .withExposedService("postgres_1", 5432)
+        .withExposedService("mongo_1", 27017)
+        .withExposedService("kafka_1", 9092);
 
-  private RequestSpecification requestSpecification;
+    private RequestSpecification requestSpecification;
 
-  @BeforeAll
-  void prepareSpec(Vertx vertx, VertxTestContext testContext) {
-    requestSpecification = new RequestSpecBuilder()
-      .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))
-      .setBaseUri("http://localhost:4000/")
-      .setBasePath("/api/v1")
-      .build();
+    @BeforeAll
+    void prepareSpec(Vertx vertx, VertxTestContext testContext) {
+        requestSpecification = new RequestSpecBuilder()
+            .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))
+            .setBaseUri("http://localhost:4000/")
+            .setBasePath("/api/v1")
+            .build();
 
-    String insertQuery = "INSERT INTO stepevent VALUES($1, $2, $3::timestamp, $4)";
-    List<Tuple> data = Arrays.asList(
-      Tuple.of("a1b2c3", 1, LocalDateTime.of(2019, 6, 16, 10, 3), 250),
-      Tuple.of("a1b2c3", 2, LocalDateTime.of(2019, 6, 16, 12, 30), 1000),
-      Tuple.of("a1b2c3", 3, LocalDateTime.of(2019, 6, 15, 23, 00), 5005)
-    );
-    PgPool pgPool = PgPool.pool(vertx, new PgConnectOptions()
-      .setHost("localhost")
-      .setDatabase("postgres")
-      .setUser("postgres")
-      .setPassword("vertx-in-action"), new PoolOptions());
+        String insertQuery = "INSERT INTO stepevent VALUES($1, $2, $3::timestamp, $4)";
+        List<Tuple> data = Arrays.asList(
+            Tuple.of("a1b2c3", 1, LocalDateTime.of(2019, 6, 16, 10, 3), 250),
+            Tuple.of("a1b2c3", 2, LocalDateTime.of(2019, 6, 16, 12, 30), 1000),
+            Tuple.of("a1b2c3", 3, LocalDateTime.of(2019, 6, 15, 23, 00), 5005)
+        );
+        PgPool pgPool = PgPool.pool(vertx, new PgConnectOptions()
+            .setHost("localhost")
+            .setDatabase("postgres")
+            .setUser("postgres")
+            .setPassword("vertx-in-action"), new PoolOptions());
 
-    pgPool.preparedQuery(insertQuery)
-      .rxExecuteBatch(data)
-      .ignoreElement()
-      .andThen(vertx.rxDeployVerticle(new PublicApiVerticle()))
-      .ignoreElement()
-      .andThen(vertx.rxDeployVerticle("tenksteps.userprofiles.UserProfileApiVerticle"))
-      .ignoreElement()
-      .andThen(vertx.rxDeployVerticle("tenksteps.activities.ActivityApiVerticle"))
-      .ignoreElement()
-      .andThen(Completable.fromAction(pgPool::close))
-      .subscribe(testContext::completeNow, testContext::failNow);
-  }
-
-  private final HashMap<String, JsonObject> registrations = new HashMap<String, JsonObject>() {
-    {
-      put("Foo", new JsonObject()
-        .put("username", "Foo")
-        .put("password", "foo-123")
-        .put("email", "foo@email.me")
-        .put("city", "Lyon")
-        .put("deviceId", "a1b2c3")
-        .put("makePublic", true));
-
-      put("Bar", new JsonObject()
-        .put("username", "Bar")
-        .put("password", "bar-#$69")
-        .put("email", "bar@email.me")
-        .put("city", "Tassin-La-Demi-Lune")
-        .put("deviceId", "def1234")
-        .put("makePublic", false));
+        pgPool.preparedQuery(insertQuery)
+            .rxExecuteBatch(data)
+            .ignoreElement()
+            .andThen(vertx.rxDeployVerticle(new PublicApiVerticle()))
+            .ignoreElement()
+            .andThen(vertx.rxDeployVerticle("tenksteps.userprofiles.UserProfileApiVerticle"))
+            .ignoreElement()
+            .andThen(vertx.rxDeployVerticle("tenksteps.activities.ActivityApiVerticle"))
+            .ignoreElement()
+            .andThen(Completable.fromAction(pgPool::close))
+            .subscribe(testContext::completeNow, testContext::failNow);
     }
-  };
 
-  @Test
-  @Order(1)
-  @DisplayName("Register some users")
-  void registerUsers() {
-    registrations.forEach((key, registration) -> {
-      given(requestSpecification)
-        .contentType(ContentType.JSON)
-        .body(registration.encode())
-        .post("/register")
-        .then()
-        .assertThat()
-        .statusCode(200);
-    });
-  }
+    private final HashMap<String, JsonObject> registrations = new HashMap<String, JsonObject>() {
+        {
+            put("Foo", new JsonObject()
+                .put("username", "Foo")
+                .put("password", "foo-123")
+                .put("email", "foo@email.me")
+                .put("city", "Lyon")
+                .put("deviceId", "a1b2c3")
+                .put("makePublic", true));
 
-  private final HashMap<String, String> tokens = new HashMap<>();
+            put("Bar", new JsonObject()
+                .put("username", "Bar")
+                .put("password", "bar-#$69")
+                .put("email", "bar@email.me")
+                .put("city", "Tassin-La-Demi-Lune")
+                .put("deviceId", "def1234")
+                .put("makePublic", false));
+        }
+    };
 
-  @Test
-  @Order(2)
-  @DisplayName("Get JWT tokens to access the API")
-  void obtainToken() {
-    registrations.forEach((key, registration) -> {
+    @Test
+    @Order(1)
+    @DisplayName("Register some users")
+    void registerUsers() {
+        registrations.forEach((key, registration) -> {
+            given(requestSpecification)
+                .contentType(ContentType.JSON)
+                .body(registration.encode())
+                .post("/register")
+                .then()
+                .assertThat()
+                .statusCode(200);
+        });
+    }
 
-      JsonObject login = new JsonObject()
-        .put("username", key)
-        .put("password", registration.getString("password"));
+    private final HashMap<String, String> tokens = new HashMap<>();
 
-      String token = given(requestSpecification)
-        .contentType(ContentType.JSON)
-        .body(login.encode())
-        .post("/token")
-        .then()
-        .assertThat()
-        .statusCode(200)
-        .contentType("application/jwt")
-        .extract()
-        .asString();
+    @Test
+    @Order(2)
+    @DisplayName("Get JWT tokens to access the API")
+    void obtainToken() {
+        registrations.forEach((key, registration) -> {
 
-      assertThat(token)
-        .isNotNull()
-        .isNotBlank();
+            JsonObject login = new JsonObject()
+                .put("username", key)
+                .put("password", registration.getString("password"));
 
-      tokens.put(key, token);
-    });
-  }
+            String token = given(requestSpecification)
+                .contentType(ContentType.JSON)
+                .body(login.encode())
+                .post("/token")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .contentType("application/jwt")
+                .extract()
+                .asString();
 
-  @Test
-  @Order(3)
-  @DisplayName("Fetch a user data")
-  void fetchSomeUser() {
-    JsonPath jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .extract()
-      .jsonPath();
+            assertThat(token)
+                .isNotNull()
+                .isNotBlank();
 
-    JsonObject foo = registrations.get("Foo");
-    List<String> props = asList("username", "email", "city", "deviceId");
-    props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(foo.getString(prop)));
-    assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(foo.getBoolean("makePublic"));
-  }
+            tokens.put(key, token);
+        });
+    }
 
-  @Test
-  @Order(4)
-  @DisplayName("Fail at fetching another user data")
-  void failToFatchAnotherUser() {
-    given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Bar")
-      .then()
-      .assertThat()
-      .statusCode(403);
-  }
+    @Test
+    @Order(3)
+    @DisplayName("Fetch a user data")
+    void fetchSomeUser() {
+        JsonPath jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .extract()
+            .jsonPath();
 
-  @Test
-  @Order(5)
-  @DisplayName("Update some user data")
-  void updateSomeUser() {
-    String originalCity = registrations.get("Foo").getString("city");
-    boolean originalMakePublic = registrations.get("Foo").getBoolean("makePublic");
-    JsonObject updates = new JsonObject()
-      .put("city", "Nevers")
-      .put("makePublic", false);
+        JsonObject foo = registrations.get("Foo");
+        List<String> props = asList("username", "email", "city", "deviceId");
+        props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(foo.getString(prop)));
+        assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(foo.getBoolean("makePublic"));
+    }
 
-    given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .contentType(ContentType.JSON)
-      .body(updates.encode())
-      .put("/Foo")
-      .then()
-      .assertThat()
-      .statusCode(200);
+    @Test
+    @Order(4)
+    @DisplayName("Fail at fetching another user data")
+    void failToFatchAnotherUser() {
+        given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Bar")
+            .then()
+            .assertThat()
+            .statusCode(403);
+    }
 
-    JsonPath jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .extract()
-      .jsonPath();
+    @Test
+    @Order(5)
+    @DisplayName("Update some user data")
+    void updateSomeUser() {
+        String originalCity = registrations.get("Foo").getString("city");
+        boolean originalMakePublic = registrations.get("Foo").getBoolean("makePublic");
+        JsonObject updates = new JsonObject()
+            .put("city", "Nevers")
+            .put("makePublic", false);
 
-    assertThat(jsonPath.getString("city")).isEqualTo(updates.getString("city"));
-    assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(updates.getBoolean("makePublic"));
+        given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .contentType(ContentType.JSON)
+            .body(updates.encode())
+            .put("/Foo")
+            .then()
+            .assertThat()
+            .statusCode(200);
 
-    updates
-      .put("city", originalCity)
-      .put("makePublic", originalMakePublic);
+        JsonPath jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .extract()
+            .jsonPath();
 
-    given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .contentType(ContentType.JSON)
-      .body(updates.encode())
-      .put("/Foo")
-      .then()
-      .assertThat()
-      .statusCode(200);
+        assertThat(jsonPath.getString("city")).isEqualTo(updates.getString("city"));
+        assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(updates.getBoolean("makePublic"));
 
-    jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .extract()
-      .jsonPath();
+        updates
+            .put("city", originalCity)
+            .put("makePublic", originalMakePublic);
 
-    assertThat(jsonPath.getString("city")).isEqualTo(originalCity);
-    assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(originalMakePublic);
-  }
+        given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .contentType(ContentType.JSON)
+            .body(updates.encode())
+            .put("/Foo")
+            .then()
+            .assertThat()
+            .statusCode(200);
 
-  @Test
-  @Order(6)
-  @DisplayName("Check some user stats")
-  void checkSomeUserStats() {
-    JsonPath jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo/total")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .contentType(ContentType.JSON)
-      .extract()
-      .jsonPath();
+        jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .extract()
+            .jsonPath();
 
-    assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255);
+        assertThat(jsonPath.getString("city")).isEqualTo(originalCity);
+        assertThat(jsonPath.getBoolean("makePublic")).isEqualTo(originalMakePublic);
+    }
 
-    jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo/2019/06")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .contentType(ContentType.JSON)
-      .extract()
-      .jsonPath();
+    @Test
+    @Order(6)
+    @DisplayName("Check some user stats")
+    void checkSomeUserStats() {
+        JsonPath jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo/total")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .jsonPath();
 
-    assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255);
+        assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255);
 
-    jsonPath = given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Foo/2019/06/15")
-      .then()
-      .assertThat()
-      .statusCode(200)
-      .contentType(ContentType.JSON)
-      .extract()
-      .jsonPath();
+        jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo/2019/06")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .jsonPath();
 
-    assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(5005);
-  }
+        assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(6255);
 
-  @Test
-  @Order(7)
-  @DisplayName("Check that you cannot access somebody else's stats")
-  void cannotAccessSomebodyElseStats() {
-    given(requestSpecification)
-      .headers("Authorization", "Bearer " + tokens.get("Foo"))
-      .get("/Bar/total")
-      .then()
-      .assertThat()
-      .statusCode(403);
-  }
+        jsonPath = given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Foo/2019/06/15")
+            .then()
+            .assertThat()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .extract()
+            .jsonPath();
+
+        assertThat(jsonPath.getInt("count")).isNotNull().isEqualTo(5005);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Check that you cannot access somebody else's stats")
+    void cannotAccessSomebodyElseStats() {
+        given(requestSpecification)
+            .headers("Authorization", "Bearer " + tokens.get("Foo"))
+            .get("/Bar/total")
+            .then()
+            .assertThat()
+            .statusCode(403);
+    }
 }

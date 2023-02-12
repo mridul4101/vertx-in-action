@@ -1,12 +1,12 @@
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
-  name: prometheus
+    name: prometheus
 spec:
-  serviceAccountName: prometheus
-  serviceMonitorSelector:
-    matchLabels:
-      app: sensor-gateway
-  resources:
-    requests:
-      memory: 400Mi
+    serviceAccountName: prometheus
+    serviceMonitorSelector:
+        matchLabels:
+            app: sensor-gateway
+    resources:
+        requests:
+            memory: 400Mi

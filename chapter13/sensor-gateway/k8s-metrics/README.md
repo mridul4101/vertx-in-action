@@ -22,7 +22,8 @@ You can access Grafana at http://localhost:3000 using port forwarding:
 
 Use `admin / admin` as default credentials.
 
-The Vert.x examples contain a Grafana dashboard at https://github.com/vert-x3/vertx-examples/tree/master/micrometer-metrics-examples/grafana
+The Vert.x examples contain a Grafana dashboard
+at https://github.com/vert-x3/vertx-examples/tree/master/micrometer-metrics-examples/grafana
 
 Just import the JSON definition into Grafana.
 Use Prometheus as the database.

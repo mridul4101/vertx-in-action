@@ -10,19 +10,19 @@ import java.util.concurrent.TimeUnit;
 
 public class VertxIntro extends AbstractVerticle {
 
-  @Override
-  public Completable rxStart() {
-    Observable
-      .interval(1, TimeUnit.SECONDS, RxHelper.scheduler(vertx))
-      .subscribe(n -> System.out.println("tick"));
+    @Override
+    public Completable rxStart() {
+        Observable
+            .interval(1, TimeUnit.SECONDS, RxHelper.scheduler(vertx))
+            .subscribe(n -> System.out.println("tick"));
 
-    return vertx.createHttpServer()
-      .requestHandler(r -> r.response().end("Ok"))
-      .rxListen(8080)
-      .ignoreElement();
-  }
+        return vertx.createHttpServer()
+            .requestHandler(r -> r.response().end("Ok"))
+            .rxListen(8080)
+            .ignoreElement();
+    }
 
-  public static void main(String[] args) {
-    Vertx.vertx().deployVerticle(new VertxIntro());
-  }
+    public static void main(String[] args) {
+        Vertx.vertx().deployVerticle(new VertxIntro());
+    }
 }

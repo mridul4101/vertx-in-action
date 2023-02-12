@@ -4,13 +4,16 @@
 
 👋 Welcome!
 
-These are the working examples for [Vert.x in Action](https://www.manning.com/books/vertx-in-action) (ISBN 9781617295621) from [Manning Publications Co](https://www.manning.com/) and written by [Julien Ponge](https://julien.ponge.org/).
+These are the working examples for [Vert.x in Action](https://www.manning.com/books/vertx-in-action) (ISBN
+9781617295621) from [Manning Publications Co](https://www.manning.com/) and written
+by [Julien Ponge](https://julien.ponge.org/).
 
 ## How to open and run the examples?
 
 Readers of the book should directly open projects from subfolders: they are all independent.
 
-You will find both Gradle and Maven build descriptors for each project, so you can load the projects with text editors or integrated development environments such as IntelliJ IDEA, Eclipse IDE or Microsoft Visual Studio Code.
+You will find both Gradle and Maven build descriptors for each project, so you can load the projects with text editors
+or integrated development environments such as IntelliJ IDEA, Eclipse IDE or Microsoft Visual Studio Code.
 
 As an example if you want to build the chapter 1 with Gradle, open a terminal and run:
 
@@ -53,7 +56,8 @@ This repository contains samples against Eclipse Vert.x 4.0.3 (see tag `vertx-4.
 
 At my own discretion I _may_ update to newer versions of Vert.x when they are published.
 
-Note that the Vert.x core team has made a goal of ensuring that Vert.x 4.0.3 will work against all examples in this repository.
+Note that the Vert.x core team has made a goal of ensuring that Vert.x 4.0.3 will work against all examples in this
+repository.
 
 ## Can I contribute?
 
@@ -62,7 +66,8 @@ Due to the nature of this project I will not accept any contribution to this rep
 ## What if I have a question / issue?
 
 If you are a Manning customer then you have access to forums.
-Please refer to [Vert.x in Action on the Manning website](https://www.manning.com/books/vertx-in-action) where a link to the forum is provided.
+Please refer to [Vert.x in Action on the Manning website](https://www.manning.com/books/vertx-in-action) where a link to
+the forum is provided.
 
 If you have a question on Vert.x then please get in touch with the [Eclipse Vert.x community](https://vertx.io).
 There are several channels that you can use including public mailing-lists and chat.
@@ -73,14 +78,15 @@ If you have a problem with your book order or any special request, then please c
 
 ### November 2020
 
-Due to a peculiarities in how _TestContainers_ supports _Docker Compose_ it may be necessary to explicitly await for containers to be exposed, or test executions can sometimes fail because a container port hasn't been exposed yet.
+Due to a peculiarities in how _TestContainers_ supports _Docker Compose_ it may be necessary to explicitly await for
+containers to be exposed, or test executions can sometimes fail because a container port hasn't been exposed yet.
 
 This can be done by calling the `withExposedService` method on a `DockerComposeContainer` instance, as in:
 
 ```java
 @Container
-private static final DockerComposeContainer CONTAINERS = new DockerComposeContainer(new File("../docker-compose.yml"))
-  .withExposedService("mongo_1", 27017);
+private static final DockerComposeContainer CONTAINERS=new DockerComposeContainer(new File("../docker-compose.yml"))
+    .withExposedService("mongo_1",27017);
 ```
 
 This fix has been applied to the tests in `part2-steps-challenge`.

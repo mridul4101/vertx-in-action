@@ -11,8 +11,10 @@ To build all services run:
 
     ./gradlew build
 
-Tests are being run as part of the build process, relying on container images to be started to run integration tests against various middleware such as _Apache Kafka_ or _PostgreSQL_.
-You may encounter occasional _flaky_ tests, and/or you may also not have enough resources to run all containers while running tests, which may explain potential errors.
+Tests are being run as part of the build process, relying on container images to be started to run integration tests
+against various middleware such as _Apache Kafka_ or _PostgreSQL_.
+You may encounter occasional _flaky_ tests, and/or you may also not have enough resources to run all containers while
+running tests, which may explain potential errors.
 
 To build all services without running tests simply run:
 
@@ -27,7 +29,8 @@ First open a terminal to start all middleware containers with _Docker Compose_:
 The micro-services are specified in a `Procfile` and there exist many tools to run them:
 
 * in the book I recommend [foreman](https://github.com/ddollar/foreman) which is written in Ruby,
-* you can alternatively use [hivemind](https://github.com/DarthSim/hivemind) which is written in Go and thus is available as a zero-dependency executable,
+* you can alternatively use [hivemind](https://github.com/DarthSim/hivemind) which is written in Go and thus is
+  available as a zero-dependency executable,
 * you can find another tool, but `foreman` and `hivemind` are those that I have personally tested.
 
 Open another terminal to run the services.
